@@ -15,7 +15,7 @@ import (
 	runt "runtime"
 	"strings"
 
-	"github.com/amzapi/selling-partner-api-sdk/pkg/runtime"
+	"github.com/jaxhuan/selling-partner-api-sdk/pkg/runtime"
 )
 
 // RequestBeforeFn  is the function signature for the RequestBefore callback function
@@ -911,7 +911,7 @@ func WithBaseURL(baseURL string) ClientOption {
 type ClientWithResponsesInterface interface {
 	// GetReportDocument request
 	GetReportDocumentWithResponse(ctx context.Context, reportDocumentId string, params ...string) (*GetReportDocumentResp, error)
-	
+
 	// GetReports request
 	GetReportsWithResponse(ctx context.Context, params *GetReportsParams) (*GetReportsResp, error)
 
