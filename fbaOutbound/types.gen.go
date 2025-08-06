@@ -1300,3 +1300,30 @@ type UpdateFulfillmentOrderJSONRequestBody UpdateFulfillmentOrderJSONBody
 
 // CreateFulfillmentReturnRequestBody defines body for CreateFulfillmentReturn for application/json ContentType.
 type CreateFulfillmentReturnJSONRequestBody CreateFulfillmentReturnJSONBody
+
+// SubmitFulfillmentOrderStatusUpdateJSONRequestBody defines body for SubmitFulfillmentOrderStatusUpdate for application/json ContentType.
+type SubmitFulfillmentOrderStatusUpdateJSONRequestBody struct {
+
+	// required; The current status of the fulfillment order.
+	FulfillmentOrderStatus *string `json:"FulfillmentOrderStatus"`
+}
+
+const (
+	FULFILLMENT_ORDER_STATUS_NEW                  string = "New"                //The fulfillment order was received but not yet validated.
+	FULFILLMENT_ORDER_STATUS_RECEIVED             string = "Received"           //The fulfillment order was received and validated. Validation includes determining that the destination address is valid and that Amazon's records indicate that the seller has enough sellable (undamaged) inventory to fulfill the order. The seller can cancel a fulfillment order that has a status of Received.
+	FULFILLMENT_ORDER_STATUS_PLANNING             string = "Planning"           //The fulfillment order has been sent to Amazon's fulfillment network to begin shipment planning, but no unit in any shipment has been picked from inventory yet. The seller can cancel a fulfillment order that has a status of Planning.
+	FULFILLMENT_ORDER_STATUS_PROCESSING           string = "Processing"         //The process of picking units from inventory has begun on at least one shipment in the fulfillment order. The seller cannot cancel a fulfillment order that has a status of Processing.
+	FULFILLMENT_ORDER_STATUS_CANCELLED            string = "Cancelled"          //The fulfillment order has been cancelled by the seller.
+	FULFILLMENT_ORDER_STATUS_COMPLETE             string = "Complete"           //All item quantities in the fulfillment order have been fulfilled.
+	FULFILLMENT_ORDER_STATUS_COMPLETE_PARTICALLED string = "CompletePartialled" //Some item quantities in the fulfillment order were fulfilled; the rest were either cancelled or unfulfillable.
+	FULFILLMENT_ORDER_STATUS_UNFULFILLABLE        string = "Unfulfillable"      //No item quantities in the fulfillment order could be fulfilled because the Amazon fulfillment center workers found no inventory for those items or found no inventory that was in sellable (undamaged) condition.
+	FULFILLMENT_ORDER_STATUS_INVALID              string = "Invalid"            //The fulfillment order was received but could not be validated. The reasons for this include an invalid destination address or Amazon's records indicating that the seller does not have enough sellable inventory to fulfill the order. When this happens, the fulfillment order is invalid and no items in the order will ship.
+
+)
+
+// SubmitFulfillmentOrderStatusUpdateResponse defines model for SubmitFulfillmentOrderStatusUpdateResponse.
+type SubmitFulfillmentOrderStatusUpdateResponse struct {
+
+	// A list of error responses returned when a request is unsuccessful.
+	Errors *ErrorList `json:"errors,omitempty"`
+}

@@ -167,6 +167,9 @@ type ClientInterface interface {
 
 	// GetPackageTrackingDetails request
 	GetPackageTrackingDetails(ctx context.Context, params *GetPackageTrackingDetailsParams) (*http.Response, error)
+
+	// SubmitFulfillmentOrderStatusUpdate request
+	SubmitFulfillmentOrderStatusUpdate(ctx context.Context, sellerFulfillmentOrderId string, body SubmitFulfillmentOrderStatusUpdateJSONRequestBody) (*http.Response, error)
 }
 
 func (c *Client) GetFeatures(ctx context.Context, params *GetFeaturesParams) (*http.Response, error) {
@@ -575,6 +578,21 @@ func (c *Client) GetPackageTrackingDetails(ctx context.Context, params *GetPacka
 		}
 	}
 	return rsp, nil
+}
+
+func (c *Client) SubmitFulfillmentOrderStatusUpdate(ctx context.Context, sellerFulfillmentOrderId string, body SubmitFulfillmentOrderStatusUpdateJSONRequestBody) (*http.Response, error) {
+	req, err := NewSubmitFulfillmentOrderStatusUpdateRequest(c.Endpoint, sellerFulfillmentOrderId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestBefore != nil {
+		err = c.RequestBefore(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
 }
 
 // NewGetFeaturesRequest generates requests for GetFeatures
@@ -1174,6 +1192,52 @@ func NewGetPackageTrackingDetailsRequest(endpoint string, params *GetPackageTrac
 	return req, nil
 }
 
+// NewSubmitFulfillmentOrderStatusUpdateRequest calls the generic SubmitFulfillmentOrderStatusUpdate builder with application/json body
+func NewSubmitFulfillmentOrderStatusUpdateRequest(endpoint string, sellerFulfillmentOrderId string, body SubmitFulfillmentOrderStatusUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSubmitFulfillmentOrderStatusUpdateRequestWithBody(endpoint, sellerFulfillmentOrderId, "application/json", bodyReader)
+}
+
+// NewSubmitFulfillmentOrderStatusUpdateRequestWithBody generates requests for SubmitFulfillmentOrderStatusUpdate with any type of body
+func NewSubmitFulfillmentOrderStatusUpdateRequestWithBody(endpoint string, sellerFulfillmentOrderId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "sellerFulfillmentOrderId", sellerFulfillmentOrderId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/fba/outbound/2020-07-01/fulfillmentOrders/%s/status", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+	return req, nil
+}
+
 // ClientWithResponses builds on ClientInterface to offer response payloads
 type ClientWithResponses struct {
 	ClientInterface
@@ -1246,6 +1310,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetPackageTrackingDetails request
 	GetPackageTrackingDetailsWithResponse(ctx context.Context, params *GetPackageTrackingDetailsParams) (*GetPackageTrackingDetailsResp, error)
+
+	// SubmitFulfillmentOrderStatusUpdate request
+	SubmitFulfillmentOrderStatusUpdateWithResponse(ctx context.Context, sellerFulfillmentOrderId string, body SubmitFulfillmentOrderStatusUpdateJSONRequestBody) (*GetPackageTrackingDetailsResp, error)
 }
 
 type GetFeaturesResp struct {
@@ -1652,6 +1719,15 @@ func (c *ClientWithResponses) GetPackageTrackingDetailsWithResponse(ctx context.
 	return ParseGetPackageTrackingDetailsResp(rsp)
 }
 
+// SubmitFulfillmentOrderStatusUpdateWithResponse request returning *SubmitFulfillmentOrderStatusUpdateResponse
+func (c *ClientWithResponses) SubmitFulfillmentOrderStatusUpdateWithResponse(ctx context.Context, sellerFulfillmentOrderId string, body SubmitFulfillmentOrderStatusUpdateJSONRequestBody) (*SubmitFulfillmentOrderStatusUpdateResp, error) {
+	rsp, err := c.SubmitFulfillmentOrderStatusUpdate(ctx, sellerFulfillmentOrderId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSubmitFulfillmentOrderStatusUpdateResp(rsp)
+}
+
 // ParseGetFeaturesResp parses an HTTP response from a GetFeaturesWithResponse call
 func ParseGetFeaturesResp(rsp *http.Response) (*GetFeaturesResp, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1974,4 +2050,37 @@ func ParseGetPackageTrackingDetailsResp(rsp *http.Response) (*GetPackageTracking
 	}
 
 	return response, err
+}
+
+// ParseSubmitFulfillmentOrderStatusUpdateResp parses an HTTP response from a SubmitFulfillmentOrderStatusUpdateWithResponse call
+func ParseSubmitFulfillmentOrderStatusUpdateResp(rsp *http.Response) (*SubmitFulfillmentOrderStatusUpdateResp, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SubmitFulfillmentOrderStatusUpdateResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	var dest SubmitFulfillmentOrderStatusUpdateResponse
+	if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+		return nil, err
+	}
+
+	response.Model = &dest
+
+	if rsp.StatusCode >= 300 {
+		err = fmt.Errorf(rsp.Status)
+	}
+
+	return response, err
+}
+
+type SubmitFulfillmentOrderStatusUpdateResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	Model        *SubmitFulfillmentOrderStatusUpdateResponse
 }
