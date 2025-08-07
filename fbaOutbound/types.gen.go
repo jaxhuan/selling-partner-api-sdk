@@ -1305,7 +1305,7 @@ type CreateFulfillmentReturnJSONRequestBody CreateFulfillmentReturnJSONBody
 type SubmitFulfillmentOrderStatusUpdateJSONRequestBody struct {
 
 	// required; The current status of the fulfillment order.
-	FulfillmentOrderStatus *string `json:"FulfillmentOrderStatus"`
+	FulfillmentOrderStatus *string `json:"fulfillmentOrderStatus"`
 }
 
 const (
